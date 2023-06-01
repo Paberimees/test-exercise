@@ -46,7 +46,7 @@ async function generateOutput(fileName) {
 		output = output + `${IBAN};${await validateIBAN(IBAN)}` + "\n";
 	}
 
-	console.log(await writeOutput(filePath, output));
+	return writeOutput(filePath, output);
 }
 
 //Writes output to file
