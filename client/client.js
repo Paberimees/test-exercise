@@ -22,7 +22,7 @@ while (running) {
 			console.log("Single validation, please enter an IBAN to validate:");
 			let input = prompt();
 			let result = await validateIBAN(input);
-			console.log(`That IBAN is: ${result}\n`);
+			console.log(`Is that IBAN valid: ${result}\n`);
 			break;
 		case "F":
 			console.log("File validation, please enter a filename with IBANs:");
