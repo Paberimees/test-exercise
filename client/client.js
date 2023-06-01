@@ -1,72 +1,36 @@
-import axios from "axios";
-import { readFile, writeFile } from "fs";
-import { resolve as resolvePath, parse as parsePath, dirname } from "path";
-import { fileURLToPath } from "url";
+import promptSync from "prompt-sync";
+import { generateOutput, validateIBAN } from "./logic.js";
 
-//Hack to allow __dirname usage in modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const prompt = promptSync();
 
-const url = "http://localhost:3000";
+console.log("Welcome to IBAN validator.");
+var running = true;
 
-//Sends POST call to API that validates IBANs
-function validateIBAN(IBAN) {
-	return new Promise((resolve, reject) => {
-		axios.post(`${url}/validate`, { iban: IBAN }).then(
-			(response) => {
-				resolve(response.data.result);
-			},
-			(error) => {
-				reject(error);
-			}
-		);
-	});
-}
-
-async function readInput(filePath) {
-	return new Promise((resolve, reject) => {
-		readFile(filePath, "utf-8", (error, data) => {
-			if (error) {
-				reject(error);
-			} else {
-				resolve(data.split("\n"));
-			}
-		});
-	});
-}
-
-//Reads input from file, makes new output file in same place with .out extension
-async function generateOutput(filePath) {
-	var IBANs = await readInput(filePath);
-	var output = "";
-
-	for (let rawIBAN of IBANs) {
-		let IBAN = rawIBAN.trim(); //Line breaks and such, gets rid of em
-		output = output + `${IBAN};${await validateIBAN(IBAN)}` + "\n";
-	}
-
-	writeOutput(filePath, output);
-}
-
-//Writes output to file
-function writeOutput(filePath, data) {
-	//Changes the extension, puts the new path together again
-	let pathSegments = parsePath(filePath);
-	pathSegments.ext = ".out";
-	let resolvedPath = resolvePath(
-		pathSegments.dir,
-		pathSegments.name + pathSegments.ext
+while (running) {
+	console.log(
+		"Type a letter for corresponding action:\n[S] single validation\n[F] multi-validation via file\n[Q] quit\n"
 	);
-	console.log(resolvedPath);
-	writeFile(resolvedPath, data, "utf-8", (error) => {
-		if (error) throw error;
-	});
-}
+	var action = prompt();
+	action = action.toUpperCase();
 
-function main() {
-	var fileName = "input2.txt";
-	var filePath = resolvePath(__dirname, fileName);
-	generateOutput(filePath);
+	switch (action) {
+		case "Q":
+			running = false;
+			console.log("Exiting program...");
+			break;
+		case "S":
+			console.log("Single validation, please enter an IBAN to validate:");
+			let input = prompt();
+			let result = await validateIBAN(input);
+			console.log(`That IBAN is: ${result}\n`);
+			break;
+		case "F":
+			console.log("File validation, please enter a filename with IBANs:");
+			let fileName = prompt();
+			await generateOutput(fileName);
+			console.log(`Output file .out created for ${fileName}\n`);
+			break;
+		default:
+			console.log("Unrecognized command, please try again!\n");
+	}
 }
-
-main();
