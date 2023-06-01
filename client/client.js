@@ -63,10 +63,9 @@ function writeOutput(filePath, data) {
 	});
 }
 
-async function main() {
-	let fileName = "input.txt";
-	let filePath = resolvePath(__dirname, fileName);
-	console.log(`File path is - ${filePath}`);
+function main() {
+	var fileName = "input2.txt";
+	var filePath = resolvePath(__dirname, fileName);
 	generateOutput(filePath);
 }
 
